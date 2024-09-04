@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai V8 เครื่องมืออัจฉริยะ</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary-color: #00c8ff;
+            --secondary-color: #0080ff;
+            --bg-color: #0f172a;
+            --text-color: #e2e8f0;
+            --container-bg: #1e293b;
+            --input-bg: #334155;
+            --border-color: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Prompt', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 200, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 128, 255, 0.1) 0%, transparent 20%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 2.5rem;
+            background-color: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+            font-size: 2rem;
+        }
+
+        .lead {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #94a3b8;
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            color: var(--bg-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 6px rgba(0, 200, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 200, 255, 0.4);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        #previewContainer {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        #bubblePreview {
+            max-width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 200, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #bubbleContent {
+            padding: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .user-info img {
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+        }
+
+        .user-info p {
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-info">
+            <img id="pictureUrl" alt="User Profile" width="80" height="80"> 
+            <p id="displayName"></p>
+        </div>
+
+        <h2>Ai V8</h2>
+        <h2>เครื่องมืออัจฉริยะ</h2>
+        <p class="lead">เลือกกลุ่มและข้อความที่ต้องการส่งได้เลยครับ</p>
+        
+        <div class="form-group">
+            <label for="groupSelect">เลือกหัวข้อกลุ่มที่ต้องการ:</label>
+            <select class="form-control" id="groupSelect">
+                <option value="-1" selected>-- เลือกกลุ่ม --</option>
+                <option value="1">ONLINE</option>
+                <option value="2">TTS(จับมือทำ)</option>
+                <option value="3">ข้อมูลเพิ่มเติมอื่นๆ</option>
+                <option value="4">ข้อมูลสินค้า</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="flexSelect">เลือกข้อความที่จะส่ง:</label>
+            <select class="form-control" id="flexSelect" disabled>
+                <option value="-1" selected>-- เลือกข้อความ --</option>
+            </select>
+        </div>
+        
+        <div id="previewContainer" style="display: none;">
+            <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Flex Message Preview:</h3>
+            <div id="bubblePreview">
+                <div id="bubbleContent"></div>
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="shareBtn" class="btn btn-primary" disabled>ส่งข้อความ</button>
+        </div>
+    </div>
+
+    <script>
+    const LIFF_ID = "2006070736-AN1rzPyB"; // แทนที่ด้วย LIFF ID ของคุณ
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmCAAs6KXOYye3qexpgobroYdgpdhBbypWHkCwlGnlx8auzQAmhATZEXQ5ABQyn5M/exec"; // แทนที่ด้วย URL ของ Apps Script ที่เผยแพร่
+    
+    let flexMessages = {};
+
+    // Initialize LIFF
+    liff.init({ liffId: LIFF_ID })
+        .then(() => {
+            console.log("LIFF Initialized");
+            if (liff.isLoggedIn()) {
+                runApp();
+            } else {
+                liff.login();
+            }
+        })
+        .catch((err) => {
+            console.log("LIFF Initialization failed:", err);
+        });
+
+    function runApp() {
+        liff.getProfile().then(profile => {
+            document.getElementById("pictureUrl").src = profile.pictureUrl;
+            document.getElementById("displayName").innerHTML = '<b>ยินดีต้อนรับคุณ:</b> ' + profile.displayName;
+        }).catch(err => console.error(err));
+
+        fetchFlexMessages(); // Load Flex Messages after LIFF is initialized
+    }
+
+    function fetchFlexMessages() {
+        fetch(APPS_SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                flexMessages = data;
+                console.log("Fetched Flex Messages:", flexMessages);
+                document.getElementById('groupSelect').disabled = false;
+                document.getElementById('groupSelect').dispatchEvent(new Event('change'));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('ไม่สามารถโหลดข้อมูล Flex Messages ได้');
+            });
+    }
+
+    document.getElementById('groupSelect').addEventListener('change', () => {
+        const selectedGroup = document.getElementById('groupSelect').value;
+        const flexSelect = document.getElementById('flexSelect');
+        flexSelect.innerHTML = '<option value="-1" selected>-- เลือกข้อความ --</option>';
+
+        if (selectedGroup > 0) {
+            const groupMessages = flexMessages['group' + selectedGroup] || [];
+            groupMessages.forEach((flexMessage, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.text = `${flexMessage.id}: ${flexMessage.altText}`;
+                flexSelect.add(option);
+            });
+            flexSelect.disabled = false;
+        } else {
+            flexSelect.disabled = true;
+            document.getElementById('previewContainer').style.display = 'none';
+        }
+    });
+
+    document.getElementById('flexSelect').addEventListener('change', updatePreview);
+
+    function updatePreview() {
+        const selectedGroup = document.getElementById('groupSelect').value;
+        const selectedIndex = document.getElementById('flexSelect').value;
+        const previewContainer = document.getElementById('previewContainer');
+        const bubbleContent = document.getElementById('bubbleContent');
+        const shareBtn = document.getElementById('shareBtn');
+
+        if (selectedIndex >= 0) {
+            const groupMessages = flexMessages['group' + selectedGroup] || [];
+            const flexMessage = groupMessages[selectedIndex];
+            if (flexMessage && flexMessage.contents) {
+                previewContainer.style.display = 'block';
+                bubbleContent.innerHTML = createBubbleHTML(flexMessage.contents);
+                shareBtn.disabled = false;
+            } else {
+                previewContainer.style.display = 'none';
+                shareBtn.disabled = true;
+           
