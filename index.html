@@ -11,10 +11,10 @@
         :root {
             --primary-color: #00c8ff;
             --secondary-color: #0080ff;
-            --bg-color: #0f172a;
-            --text-color: #e2e8f0;
-            --container-bg: #1e293b;
-            --input-bg: #334155;
+            --bg-color: #FFFFFF;
+            --text-color: #000000;
+            --container-bg: #WHITE;
+            --input-bg: #FFFFFF;
             --border-color: #475569;
         }
 
@@ -45,7 +45,7 @@
             padding: 2.5rem;
             background-color: var(--container-bg);
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -53,14 +53,14 @@
         h2 {
             text-align: center;
             color: var(--primary-color);
-            text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+            text-shadow: 0 0 2px rgba(0, 200, 255, 0.5);
             font-size: 2rem;
         }
 
         .lead {
             text-align: center;
             margin-bottom: 2rem;
-            color: #94a3b8;
+            color: BLACK;
             font-weight: 300;
             font-size: 1.1rem;
         }
@@ -278,6 +278,7 @@
 
     document.getElementById('flexSelect').addEventListener('change', updatePreview);
 
+
     function updatePreview() {
         const selectedGroup = document.getElementById('groupSelect').value;
         const selectedIndex = document.getElementById('flexSelect').value;
@@ -295,4 +296,73 @@
             } else {
                 previewContainer.style.display = 'none';
                 shareBtn.disabled = true;
-           
+            }
+        } else {
+            previewContainer.style.display = 'none';
+            shareBtn.disabled = true;
+        }
+    }
+
+    function createBubbleHTML(contents) {
+        let html = '';
+        if (contents.type === 'bubble') {
+            const header = contents.header || {};
+            const hero = contents.hero || {};
+            const body = contents.body || {};
+            const footer = contents.footer || {};
+
+            html += `<div style="background-color: ${header.backgroundColor || '#ffffff'}; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">`;
+            
+            if (hero.url) {
+                html += `<img src="${hero.url}" style="width: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">`;
+            }
+
+            if (header.contents && header.contents.length > 0) {
+                html += `<h2 style="color: ${header.contents[0].color || '#000000'};">${header.contents[0].text}</h2>`;
+            }
+
+            if (body.contents) {
+                body.contents.forEach(item => {
+                    html += `<p style="color: ${item.color || '#000000'};">${item.text}</p>`;
+                });
+            }
+
+            if (footer.contents && footer.contents.length > 0) {
+                footer.contents.forEach(item => {
+                    html += `<button style="color: ${item.color || '#000000'}; background-color: ${item.style || '#00ffff'};">${item.text}</button>`;
+                });
+            }
+
+            html += `</div>`;
+        }
+        return html;
+    }
+
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const selectedGroup = document.getElementById('groupSelect').value;
+        const selectedIndex = document.getElementById('flexSelect').value;
+        if (selectedIndex >= 0) {
+            const groupMessages = flexMessages['group' + selectedGroup] || [];
+            const flexMessage = groupMessages[selectedIndex];
+            if (flexMessage && flexMessage.contents) {
+                liff.shareTargetPicker([{
+                    type: 'flex',
+                    altText: flexMessage.altText,
+                    contents: flexMessage.contents
+                }])
+                .then(() => {
+                    console.log("Message shared");
+                })
+                .catch(error => {
+                    console.error("Error sharing message:", error);
+                    alert('ไม่สามารถแชร์ข้อความได้');
+                });
+            } else {
+                alert('ข้อความที่เลือกไม่ถูกต้อง');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
