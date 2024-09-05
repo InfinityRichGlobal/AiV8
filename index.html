@@ -230,19 +230,19 @@
 
         let flexMessages = {};
 
-        // Initialize LIFF
-        // liff.init({ liffId: LIFF_ID })
-        //     .then(() => {
-        //         console.log("LIFF Initialized");
-        //         if (liff.isLoggedIn()) {
-        //             runApp();
-        //         } else {
-        //             liff.login();
-        //         }
-        //     })
-        //     .catch((err) => {
-        //         console.log("LIFF Initialization failed:", err);
-        //     });
+        Initialize LIFF
+        liff.init({ liffId: LIFF_ID })
+            .then(() => {
+                console.log("LIFF Initialized");
+                if (liff.isLoggedIn()) {
+                    runApp();
+                } else {
+                    liff.login();
+                }
+            })
+            .catch((err) => {
+                console.log("LIFF Initialization failed:", err);
+            });
        function runApp() {
             $.get(APPS_SCRIPT_URL + "?opt=groups", function (data) {
                 console.log("🚀 !! data:", data)
