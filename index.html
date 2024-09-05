@@ -236,32 +236,29 @@
             });
 
         function runApp() {
-            $.get(APPS_SCRIPT_URL+"?opt=groups", function(data) {
+            $.get(APPS_SCRIPT_URL + "?opt=groups", function (data) {
                 console.log("🚀 !! data:", data)
                 data.groups.forEach((group, index) => {
                     $('#groupSelect').append(`<option value="${group.id}">${group.name}</option>`);
                 });
-                document.getElementById('groupSelect').addEventListener('change', () => {
-                    const selectedGroup = document.getElementById('groupSelect').value;
-                    const flexSelect = document.getElementById('flexSelect');
-                    flexSelect.innerHTML = '<option value="-1" selected>-- เลือกข้อความ --</option>';
-        
+                $('#groupSelect').on('change', () => {
+                    const selectedGroup = $('#groupSelect').val();
+                    const flexSelect = $('#flexSelect');
+                    flexSelect.html('<option value="-1" selected>-- เลือกข้อความ --</option>');
+
                     if (selectedGroup > 0) {
                         const groupMessages = flexMessages['group' + selectedGroup] || [];
                         groupMessages.forEach((flexMessage, index) => {
-                            const option = document.createElement('option');
-                            option.value = index;
-                            option.text = `${flexMessage.id}: ${flexMessage.altText}`;
-                            flexSelect.add(option);
+                            flexSelect.append('<option value="' + index + '">' + flexMessage.altText + '</option>');
                         });
-                        flexSelect.disabled = false;
+                        flexSelect.prop('disabled', false);
                     } else {
-                        flexSelect.disabled = true;
-                        document.getElementById('previewContainer').style.display = 'none';
+                        flexSelect.prop('disabled', true);
+                        $('#previewContainer').hide();
                     }
                 });
 
-                document.getElementById('flexSelect').addEventListener('change', updatePreview);            
+                $('#flexSelect').on('change', updatePreview);
             });
             liff.getProfile().then(profile => {
                 document.getElementById("pictureUrl").src = profile.pictureUrl;
@@ -275,6 +272,7 @@
             fetch(APPS_SCRIPT_URL)
                 .then(response => response.json())
                 .then(data => {
+                    console.log("🚀 !! data:", data)
                     flexMessages = data;
                     console.log("Fetched Flex Messages:", flexMessages);
                     document.getElementById('groupSelect').disabled = false;
