@@ -237,7 +237,7 @@
 
         function runApp() {
             $.get(APPS_SCRIPT_URL+"?opt=groups", function(data) {
-                data = JSON.parse(data);
+                console.log("🚀 !! data:", data)
                 data.groups.forEach((group, index) => {
                     $('#groupSelect').append(`<option value="${group.id}">${group.name}</option>`);
                 });
