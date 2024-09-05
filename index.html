@@ -241,6 +241,27 @@
                 data.groups.forEach((group, index) => {
                     $('#groupSelect').append(`<option value="${group.id}">${group.name}</option>`);
                 });
+                document.getElementById('groupSelect').addEventListener('change', () => {
+                    const selectedGroup = document.getElementById('groupSelect').value;
+                    const flexSelect = document.getElementById('flexSelect');
+                    flexSelect.innerHTML = '<option value="-1" selected>-- เลือกข้อความ --</option>';
+        
+                    if (selectedGroup > 0) {
+                        const groupMessages = flexMessages['group' + selectedGroup] || [];
+                        groupMessages.forEach((flexMessage, index) => {
+                            const option = document.createElement('option');
+                            option.value = index;
+                            option.text = `${flexMessage.id}: ${flexMessage.altText}`;
+                            flexSelect.add(option);
+                        });
+                        flexSelect.disabled = false;
+                    } else {
+                        flexSelect.disabled = true;
+                        document.getElementById('previewContainer').style.display = 'none';
+                    }
+                });
+
+                document.getElementById('flexSelect').addEventListener('change', updatePreview);            
             });
             liff.getProfile().then(profile => {
                 document.getElementById("pictureUrl").src = profile.pictureUrl;
@@ -265,27 +286,6 @@
                 });
         }
 
-        document.getElementById('groupSelect').addEventListener('change', () => {
-            const selectedGroup = document.getElementById('groupSelect').value;
-            const flexSelect = document.getElementById('flexSelect');
-            flexSelect.innerHTML = '<option value="-1" selected>-- เลือกข้อความ --</option>';
-
-            if (selectedGroup > 0) {
-                const groupMessages = flexMessages['group' + selectedGroup] || [];
-                groupMessages.forEach((flexMessage, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.text = `${flexMessage.id}: ${flexMessage.altText}`;
-                    flexSelect.add(option);
-                });
-                flexSelect.disabled = false;
-            } else {
-                flexSelect.disabled = true;
-                document.getElementById('previewContainer').style.display = 'none';
-            }
-        });
-
-        document.getElementById('flexSelect').addEventListener('change', updatePreview);
 
 
         function updatePreview() {
