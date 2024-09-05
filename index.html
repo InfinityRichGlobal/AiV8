@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ai V8 เครื่องมืออัจฉริยะ</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap');
@@ -33,7 +35,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(0, 200, 255, 0.1) 0%, transparent 20%),
                 radial-gradient(circle at 90% 80%, rgba(0, 128, 255, 0.1) 0%, transparent 20%);
             background-attachment: fixed;
@@ -171,198 +173,206 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="user-info">
-            <img id="pictureUrl" alt="User Profile" width="80" height="80"> 
+            <img id="pictureUrl" alt="User Profile" width="80" height="80">
             <p id="displayName"></p>
         </div>
 
         <h2>Ai V8</h2>
         <h2>เครื่องมืออัจฉริยะ</h2>
         <p class="lead">เลือกกลุ่มและข้อความที่ต้องการส่งได้เลยครับ</p>
-        
+
         <div class="form-group">
             <label for="groupSelect">เลือกหัวข้อกลุ่มที่ต้องการ:</label>
             <select class="form-control" id="groupSelect">
                 <option value="-1" selected>-- เลือกกลุ่ม --</option>
-                <option value="1">ONLINE</option>
+                <!-- <option value="1">ONLINE</option>
                 <option value="2">TTS(จับมือทำ)</option>
                 <option value="3">ข้อมูลเพิ่มเติมอื่นๆ</option>
-                <option value="4">ข้อมูลสินค้า</option>
+                <option value="4">ข้อมูลสินค้า</option> -->
             </select>
         </div>
-        
+
         <div class="form-group">
             <label for="flexSelect">เลือกข้อความที่จะส่ง:</label>
             <select class="form-control" id="flexSelect" disabled>
                 <option value="-1" selected>-- เลือกข้อความ --</option>
             </select>
         </div>
-        
+
         <div id="previewContainer" style="display: none;">
             <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Flex Message Preview:</h3>
             <div id="bubblePreview">
                 <div id="bubbleContent"></div>
             </div>
         </div>
-        
+
         <div class="button-container">
             <button id="shareBtn" class="btn btn-primary" disabled>ส่งข้อความ</button>
         </div>
     </div>
 
     <script>
-    const LIFF_ID = "2006070736-MX8WE12P"; // แทนที่ด้วย LIFF ID ของคุณ
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmCAAs6KXOYye3qexpgobroYdgpdhBbypWHkCwlGnlx8auzQAmhATZEXQ5ABQyn5M/exec"; // แทนที่ด้วย URL ของ Apps Script ที่เผยแพร่
-    
-    let flexMessages = {};
+        const LIFF_ID = "2006070736-MX8WE12P"; // แทนที่ด้วย LIFF ID ของคุณ
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmCAAs6KXOYye3qexpgobroYdgpdhBbypWHkCwlGnlx8auzQAmhATZEXQ5ABQyn5M/exec"; // แทนที่ด้วย URL ของ Apps Script ที่เผยแพร่
 
-    // Initialize LIFF
-    liff.init({ liffId: LIFF_ID })
-        .then(() => {
-            console.log("LIFF Initialized");
-            if (liff.isLoggedIn()) {
-                runApp();
+        let flexMessages = {};
+
+        // Initialize LIFF
+        liff.init({ liffId: LIFF_ID })
+            .then(() => {
+                console.log("LIFF Initialized");
+                if (liff.isLoggedIn()) {
+                    runApp();
+                } else {
+                    liff.login();
+                }
+            })
+            .catch((err) => {
+                console.log("LIFF Initialization failed:", err);
+            });
+
+        function runApp() {
+            $.get(APPS_SCRIPT_URL+"?opt=groups", function(data) {
+                data = JSON.parse(data);
+                data.groups.forEach((group, index) => {
+                    $('#groupSelect').append(`<option value="${group.id}">${group.name}</option>`);
+                });
+            });
+            liff.getProfile().then(profile => {
+                document.getElementById("pictureUrl").src = profile.pictureUrl;
+                document.getElementById("displayName").innerHTML = '<b>ยินดีต้อนรับคุณ:</b> ' + profile.displayName;
+            }).catch(err => console.error(err));
+
+            fetchFlexMessages(); // Load Flex Messages after LIFF is initialized
+        }
+
+        function fetchFlexMessages() {
+            fetch(APPS_SCRIPT_URL)
+                .then(response => response.json())
+                .then(data => {
+                    flexMessages = data;
+                    console.log("Fetched Flex Messages:", flexMessages);
+                    document.getElementById('groupSelect').disabled = false;
+                    document.getElementById('groupSelect').dispatchEvent(new Event('change'));
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('ไม่สามารถโหลดข้อมูล Flex Messages ได้');
+                });
+        }
+
+        document.getElementById('groupSelect').addEventListener('change', () => {
+            const selectedGroup = document.getElementById('groupSelect').value;
+            const flexSelect = document.getElementById('flexSelect');
+            flexSelect.innerHTML = '<option value="-1" selected>-- เลือกข้อความ --</option>';
+
+            if (selectedGroup > 0) {
+                const groupMessages = flexMessages['group' + selectedGroup] || [];
+                groupMessages.forEach((flexMessage, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.text = `${flexMessage.id}: ${flexMessage.altText}`;
+                    flexSelect.add(option);
+                });
+                flexSelect.disabled = false;
             } else {
-                liff.login();
+                flexSelect.disabled = true;
+                document.getElementById('previewContainer').style.display = 'none';
             }
-        })
-        .catch((err) => {
-            console.log("LIFF Initialization failed:", err);
         });
 
-    function runApp() {
-        liff.getProfile().then(profile => {
-            document.getElementById("pictureUrl").src = profile.pictureUrl;
-            document.getElementById("displayName").innerHTML = '<b>ยินดีต้อนรับคุณ:</b> ' + profile.displayName;
-        }).catch(err => console.error(err));
-
-        fetchFlexMessages(); // Load Flex Messages after LIFF is initialized
-    }
-
-    function fetchFlexMessages() {
-        fetch(APPS_SCRIPT_URL)
-            .then(response => response.json())
-            .then(data => {
-                flexMessages = data;
-                console.log("Fetched Flex Messages:", flexMessages);
-                document.getElementById('groupSelect').disabled = false;
-                document.getElementById('groupSelect').dispatchEvent(new Event('change'));
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('ไม่สามารถโหลดข้อมูล Flex Messages ได้');
-            });
-    }
-
-    document.getElementById('groupSelect').addEventListener('change', () => {
-        const selectedGroup = document.getElementById('groupSelect').value;
-        const flexSelect = document.getElementById('flexSelect');
-        flexSelect.innerHTML = '<option value="-1" selected>-- เลือกข้อความ --</option>';
-
-        if (selectedGroup > 0) {
-            const groupMessages = flexMessages['group' + selectedGroup] || [];
-            groupMessages.forEach((flexMessage, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.text = `${flexMessage.id}: ${flexMessage.altText}`;
-                flexSelect.add(option);
-            });
-            flexSelect.disabled = false;
-        } else {
-            flexSelect.disabled = true;
-            document.getElementById('previewContainer').style.display = 'none';
-        }
-    });
-
-    document.getElementById('flexSelect').addEventListener('change', updatePreview);
+        document.getElementById('flexSelect').addEventListener('change', updatePreview);
 
 
-    function updatePreview() {
-        const selectedGroup = document.getElementById('groupSelect').value;
-        const selectedIndex = document.getElementById('flexSelect').value;
-        const previewContainer = document.getElementById('previewContainer');
-        const bubbleContent = document.getElementById('bubbleContent');
-        const shareBtn = document.getElementById('shareBtn');
+        function updatePreview() {
+            const selectedGroup = document.getElementById('groupSelect').value;
+            const selectedIndex = document.getElementById('flexSelect').value;
+            const previewContainer = document.getElementById('previewContainer');
+            const bubbleContent = document.getElementById('bubbleContent');
+            const shareBtn = document.getElementById('shareBtn');
 
-        if (selectedIndex >= 0) {
-            const groupMessages = flexMessages['group' + selectedGroup] || [];
-            const flexMessage = groupMessages[selectedIndex];
-            if (flexMessage && flexMessage.contents) {
-                previewContainer.style.display = 'block';
-                bubbleContent.innerHTML = createBubbleHTML(flexMessage.contents);
-                shareBtn.disabled = false;
+            if (selectedIndex >= 0) {
+                const groupMessages = flexMessages['group' + selectedGroup] || [];
+                const flexMessage = groupMessages[selectedIndex];
+                if (flexMessage && flexMessage.contents) {
+                    previewContainer.style.display = 'block';
+                    bubbleContent.innerHTML = createBubbleHTML(flexMessage.contents);
+                    shareBtn.disabled = false;
+                } else {
+                    previewContainer.style.display = 'none';
+                    shareBtn.disabled = true;
+                }
             } else {
                 previewContainer.style.display = 'none';
                 shareBtn.disabled = true;
             }
-        } else {
-            previewContainer.style.display = 'none';
-            shareBtn.disabled = true;
         }
-    }
 
-    function createBubbleHTML(contents) {
-        let html = '';
-        if (contents.type === 'bubble') {
-            const header = contents.header || {};
-            const hero = contents.hero || {};
-            const body = contents.body || {};
-            const footer = contents.footer || {};
+        function createBubbleHTML(contents) {
+            let html = '';
+            if (contents.type === 'bubble') {
+                const header = contents.header || {};
+                const hero = contents.hero || {};
+                const body = contents.body || {};
+                const footer = contents.footer || {};
 
-            html += `<div style="background-color: ${header.backgroundColor || '#ffffff'}; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">`;
-            
-            if (hero.url) {
-                html += `<img src="${hero.url}" style="width: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">`;
+                html += `<div style="background-color: ${header.backgroundColor || '#ffffff'}; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">`;
+
+                if (hero.url) {
+                    html += `<img src="${hero.url}" style="width: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">`;
+                }
+
+                if (header.contents && header.contents.length > 0) {
+                    html += `<h2 style="color: ${header.contents[0].color || '#000000'};">${header.contents[0].text}</h2>`;
+                }
+
+                if (body.contents) {
+                    body.contents.forEach(item => {
+                        html += `<p style="color: ${item.color || '#000000'};">${item.text}</p>`;
+                    });
+                }
+
+                if (footer.contents && footer.contents.length > 0) {
+                    footer.contents.forEach(item => {
+                        html += `<button style="color: ${item.color || '#000000'}; background-color: ${item.style || '#00ffff'};">${item.text}</button>`;
+                    });
+                }
+
+                html += `</div>`;
             }
-
-            if (header.contents && header.contents.length > 0) {
-                html += `<h2 style="color: ${header.contents[0].color || '#000000'};">${header.contents[0].text}</h2>`;
-            }
-
-            if (body.contents) {
-                body.contents.forEach(item => {
-                    html += `<p style="color: ${item.color || '#000000'};">${item.text}</p>`;
-                });
-            }
-
-            if (footer.contents && footer.contents.length > 0) {
-                footer.contents.forEach(item => {
-                    html += `<button style="color: ${item.color || '#000000'}; background-color: ${item.style || '#00ffff'};">${item.text}</button>`;
-                });
-            }
-
-            html += `</div>`;
+            return html;
         }
-        return html;
-    }
 
-    document.getElementById('shareBtn').addEventListener('click', () => {
-        const selectedGroup = document.getElementById('groupSelect').value;
-        const selectedIndex = document.getElementById('flexSelect').value;
-        if (selectedIndex >= 0) {
-            const groupMessages = flexMessages['group' + selectedGroup] || [];
-            const flexMessage = groupMessages[selectedIndex];
-            if (flexMessage && flexMessage.contents) {
-                liff.shareTargetPicker([{
-                    type: 'flex',
-                    altText: flexMessage.altText,
-                    contents: flexMessage.contents
-                }])
-                .then(() => {
-                    console.log("Message shared");
-                })
-                .catch(error => {
-                    console.error("Error sharing message:", error);
-                    alert('ไม่สามารถแชร์ข้อความได้');
-                });
-            } else {
-                alert('ข้อความที่เลือกไม่ถูกต้อง');
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            const selectedGroup = document.getElementById('groupSelect').value;
+            const selectedIndex = document.getElementById('flexSelect').value;
+            if (selectedIndex >= 0) {
+                const groupMessages = flexMessages['group' + selectedGroup] || [];
+                const flexMessage = groupMessages[selectedIndex];
+                if (flexMessage && flexMessage.contents) {
+                    liff.shareTargetPicker([{
+                        type: 'flex',
+                        altText: flexMessage.altText,
+                        contents: flexMessage.contents
+                    }])
+                        .then(() => {
+                            console.log("Message shared");
+                        })
+                        .catch(error => {
+                            console.error("Error sharing message:", error);
+                            alert('ไม่สามารถแชร์ข้อความได้');
+                        });
+                } else {
+                    alert('ข้อความที่เลือกไม่ถูกต้อง');
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
+
 </html>
