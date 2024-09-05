@@ -7,6 +7,8 @@
     <title>Ai V8 เครื่องมืออัจฉริยะ</title>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="./flexhtml.js"></script>
+    <link rel="stylesheet" href="./flexhtml.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap');
 
@@ -172,6 +174,7 @@
             }
         }
     </style>
+   
 </head>
 
 <body>
@@ -203,10 +206,16 @@
             </select>
         </div>
 
-        <div id="previewContainer" style="display: none;">
+        <div id="previewContainer" style="display: none;"
             <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Flex Message Preview:</h3>
-            <div id="bubblePreview">
+            <!-- <div id="bubblePreview">
                 <div id="bubbleContent"></div>
+            </div> -->
+            <div style="overflow: auto; background-color: #849ebf; border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 1rem;">
+                <div class="reset-this">
+                    <div id="flex-show" style="padding-top: 10px;">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -222,20 +231,19 @@
         let flexMessages = {};
 
         // Initialize LIFF
-        liff.init({ liffId: LIFF_ID })
-            .then(() => {
-                console.log("LIFF Initialized");
-                if (liff.isLoggedIn()) {
-                    runApp();
-                } else {
-                    liff.login();
-                }
-            })
-            .catch((err) => {
-                console.log("LIFF Initialization failed:", err);
-            });
-
-        function runApp() {
+        // liff.init({ liffId: LIFF_ID })
+        //     .then(() => {
+        //         console.log("LIFF Initialized");
+        //         if (liff.isLoggedIn()) {
+        //             runApp();
+        //         } else {
+        //             liff.login();
+        //         }
+        //     })
+        //     .catch((err) => {
+        //         console.log("LIFF Initialization failed:", err);
+        //     });
+       function runApp() {
             $.get(APPS_SCRIPT_URL + "?opt=groups", function (data) {
                 console.log("🚀 !! data:", data)
                 data.groups.forEach((group, index) => {
@@ -293,18 +301,25 @@
             const bubbleContent = document.getElementById('bubbleContent');
             const shareBtn = document.getElementById('shareBtn');
 
-            if (flexMessages[selectedGroup]){
+            if (flexMessages[selectedGroup]) {
                 const groupMessages = flexMessages[selectedGroup] || [];
                 const flexMessage = groupMessages[selectedIndex];
                 if (flexMessage && flexMessage.contents) {
                     previewContainer.style.display = 'block';
-                    bubbleContent.innerHTML = createBubbleHTML(flexMessage.contents);
+                    $('#flex-show').html('');
+                    flex2html('flex-show', {
+                        type: 'flex',
+                        altText: 'aaaaa',
+                        contents: flexMessage.contents
+                    })
                     shareBtn.disabled = false;
                 } else {
+                    $('#flex-show').html('');
                     previewContainer.style.display = 'none';
                     shareBtn.disabled = true;
                 }
             } else {
+                $('#flex-show').html('');
                 previewContainer.style.display = 'none';
                 shareBtn.disabled = true;
             }
