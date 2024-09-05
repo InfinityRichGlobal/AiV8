@@ -293,8 +293,8 @@
             const bubbleContent = document.getElementById('bubbleContent');
             const shareBtn = document.getElementById('shareBtn');
 
-            if (selectedIndex >= 0) {
-                const groupMessages = flexMessages['group' + selectedGroup] || [];
+            if (flexMessages[selectedGroup]){
+                const groupMessages = flexMessages[selectedGroup] || [];
                 const flexMessage = groupMessages[selectedIndex];
                 if (flexMessage && flexMessage.contents) {
                     previewContainer.style.display = 'block';
@@ -348,8 +348,8 @@
         document.getElementById('shareBtn').addEventListener('click', () => {
             const selectedGroup = document.getElementById('groupSelect').value;
             const selectedIndex = document.getElementById('flexSelect').value;
-            if (selectedIndex >= 0) {
-                const groupMessages = flexMessages['group' + selectedGroup] || [];
+            if (flexMessages[selectedGroup]) {
+                const groupMessages = flexMessages[selectedGroup] || [];
                 const flexMessage = groupMessages[selectedIndex];
                 if (flexMessage && flexMessage.contents) {
                     liff.shareTargetPicker([{
