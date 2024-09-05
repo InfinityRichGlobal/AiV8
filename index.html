@@ -211,7 +211,7 @@
             <!-- <div id="bubblePreview">
                 <div id="bubbleContent"></div>
             </div> -->
-            <div style="overflow: scroll; background-color: #849ebf; border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 1rem;">
+            <div style="overflow: auto; background-color: #849ebf; border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 1rem;">
                 <div class="reset-this">
                     <div id="flex-show" style="padding-top: 10px;">
                     </div>
@@ -314,6 +314,11 @@
                         altText: 'aaaaa',
                         contents: flexMessage.contents
                     })
+                    if(flexMessage.contents.type === 'bubble'){
+                        $('.LySlider .lyInner').css('justify-content', 'center');
+                    }else{
+                        $('.LySlider .lyInner').css('justify-content', '');
+                    }
                     shareBtn.disabled = false;
                 } else {
                     $('#flex-show').html('');
