@@ -239,15 +239,15 @@
             $.get(APPS_SCRIPT_URL + "?opt=groups", function (data) {
                 console.log("🚀 !! data:", data)
                 data.groups.forEach((group, index) => {
-                    $('#groupSelect').append(`<option value="${group.id}">${group.name}</option>`);
+                    $('#groupSelect').append(`<option value="${group.name}">${group.name}</option>`);
                 });
                 $('#groupSelect').on('change', () => {
                     const selectedGroup = $('#groupSelect').val();
                     const flexSelect = $('#flexSelect');
                     flexSelect.html('<option value="-1" selected>-- เลือกข้อความ --</option>');
 
-                    if (selectedGroup > 0) {
-                        const groupMessages = flexMessages['group' + selectedGroup] || [];
+                    if (flexMessages[selectedGroup]) {
+                        const groupMessages = flexMessages[selectedGroup] || [];
                         groupMessages.forEach((flexMessage, index) => {
                             flexSelect.append('<option value="' + index + '">' + flexMessage.altText + '</option>');
                         });
