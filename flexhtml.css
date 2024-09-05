@@ -110,7 +110,6 @@
             display: -webkit-box;
             display: flex;
             width: 100%;
-            justify-content: center;
         }
 
         .LySlider .lyInner::after {
