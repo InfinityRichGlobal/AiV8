@@ -253,7 +253,8 @@
                     const selectedGroup = $('#groupSelect').val();
                     const flexSelect = $('#flexSelect');
                     flexSelect.html('<option value="-1" selected>-- เลือกข้อความ --</option>');
-
+                    $('#previewContainer').hide();
+                    $('#flex-show').html('');
                     if (flexMessages[selectedGroup]) {
                         const groupMessages = flexMessages[selectedGroup] || [];
                         groupMessages.forEach((flexMessage, index) => {
@@ -261,6 +262,7 @@
                         });
                         flexSelect.prop('disabled', false);
                     } else {
+                       
                         flexSelect.prop('disabled', true);
                         $('#previewContainer').hide();
                     }
